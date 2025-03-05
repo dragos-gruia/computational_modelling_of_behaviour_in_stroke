@@ -18,19 +18,19 @@ This repository contains the programming scripts, data, and analysis pipelines a
 
 ## Repository Structure
 
-├── Data_availability/ \# Information on how to obtain the data used in this paper
+├── Data_availability/ - Information on how to obtain the data used in this paper
 
-├── Python_scripts/ \# Analysis scripts in Python
+├── Python_scripts/ - Analysis scripts in Python
 
-├── R_scripts/ \# Analysis scripts and Jupyter notebooks
+├── R_scripts/ - Analysis scripts and Jupyter notebooks
 
-├── Figures/ \# Generated figures and visualizations
+├── Figures/ - Generated figures and visualizations
 
-├── Docs/ \# Additional information on which dependencies to install
+├── Docs/ - Additional information on which dependencies to install
 
-├── README.md \# This file
+├── README.md - This file
 
-└── LICENSE \# License information
+└── LICENSE - License information
 
 ## Requirements
 
@@ -38,9 +38,13 @@ This repository contains the programming scripts, data, and analysis pipelines a
 
 ## Installation
 
-1.  **Clone the Repository:** \`\`\`bash git clone <https://github.com/dragos-gruia/computational_modelling_of_behaviour_in_stroke> cd repository-name
+1.  **Clone the Repository:**
 
-2.  **Install Dependencies:** \`\`\`bash pip install -r docs/requirements.txt
+`bash git clone <https://github.com/dragos-gruia/computational_modelling_of_behaviour_in_stroke>  cd repository-name`
+
+2.  **Install Dependencies:**
+
+`bash pip install -r docs/requirements.txt`
 
 ## Running the Analyses
 
@@ -48,7 +52,7 @@ This repository contains the programming scripts, data, and analysis pipelines a
 
 2.  **Execute Analysis Scripts** Run the main analysis script to reproduce the results:
 
-    \`\`\` bash python scripts/run_analysis.py
+    `bash python scripts/run_analysis.py`
 
 3.  **Output** Generated figures are saved in figures/directory
 
@@ -56,9 +60,7 @@ This repository contains the programming scripts, data, and analysis pipelines a
 
 If you use this repository in your work, please cite the paper as follows:
 
-```         
-Gruia, D.-C., Giunchiglia, V., Braban, A., Parkinson, N., Banerjee, S., Kwan, J., Hellyer, P. J., Hampshire, A., & Geranmayeh, F. (2025). Differentiating motor and cognitive deficits in patients with neurological impairment during self-administered digital tasks. Pre-print.
-```
+`Gruia, D.-C., Giunchiglia, V., Braban, A., Parkinson, N., Banerjee, S., Kwan, J., Hellyer, P. J., Hampshire, A., & Geranmayeh, F. (2025). Differentiating motor and cognitive deficits in patients with neurological impairment during self-administered digital tasks. Pre-print.`
 
 ## License
 
