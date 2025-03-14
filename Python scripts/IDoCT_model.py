@@ -1,9 +1,4 @@
-import os
-import pandas as pd
-import numpy as np
-import seaborn as sn
 
-from time import time
 
 """
 Collection of functions used to estimate motor delay from cognitive tasks using
@@ -13,10 +8,23 @@ The main workflow involves two phases:
 1. Running the model on a control cohort (`run_idoct_model_controls`), deriving
    parameters like maximum AT (answer time) and maximum RT (reaction time).
 2. Applying the derived model parameters to patient data (`apply_idoct_model_patients`)
-   to compute scaled ability (AS) and delay time (DT).
+   to compute the cognitive index (AS) and response delay time (DT).
+   
+The model has been developed by Valentina Giunchiglia and is presented in detail in the original publication:
+ 
+Giunchiglia, V., Gruia, D.C., Lerede, A., Trender, W., Hellyer, P. and Hampshire, A., 2024. 
+An iterative approach for estimating domain-specific cognitive abilities from large scale online cognitive data. 
+NPJ Digital Medicine, 7(1), p.328.  
+
+Here we adapt the use of the model so that it can applied in patient populations.
 """
 
-def main(input_directory_controls, output_directory_controls, input_directory_patients, file_names):
+import os
+import pandas as pd
+import numpy as np
+from time import time
+
+def main_wrapper(root_path_controls, root_path_patients, task_names, input_directory= 'idoct_input',  output_directory = 'idoct_output'):
     
     """
     Runs the iDoct model on control data, then applies it to patient data for each task.
@@ -30,16 +38,19 @@ def main(input_directory_controls, output_directory_controls, input_directory_pa
 
     Parameters
     ----------
-    input_directory_controls : str
+    root_path_controls : str
         The directory where the control CSV files (accuracy, RT, trial definition) are located.
-    output_directory_controls : str
-        The output directory for control model results (e.g., scaled outcomes and difficulty files).
-    input_directory_patients : str
-        The directory containing patient CSV files (accuracy, RT, trial definition).
-    file_names : list of str
+    root_path_patients : str
+        The directory where the patients CSV files (accuracy, RT, trial definition) are located.
+    task_names : list of str
         The list of task file prefixes (e.g., 'IC3_calculation', 'IC3_Comprehension'). For each task,
         the function will look for files named like `{task_name}_accuracy.csv`, `{task_name}_rt.csv`,
         and `{task_name}_trialdef.csv`.
+    input_directory : str
+        The directory containing patient CSV files (accuracy, RT, trial definition).
+    output_directory : str
+        The directory for model results (e.g., scaled outcomes and difficulty files).
+
 
     Returns
     -------
@@ -49,31 +60,37 @@ def main(input_directory_controls, output_directory_controls, input_directory_pa
 
     Examples
     --------
-    >>> input_directory_controls = "/path/to/control_data"
-    >>> output_directory_controls = "/path/to/control_output"
-    >>> input_directory_patients = "/path/to/patient_data"
-    >>> tasks = ["IC3_calculation", "IC3_Comprehension"]
-    >>> main(input_directory_controls, output_directory_controls, input_directory_patients, tasks)
+    >>> root_path_controls = "/path/to/control_data"
+    >>> root_path_patients = "/path/to/control_output"
+    >>> task_names = ["IC3_calculation", "IC3_Comprehension"]
+    >>> main_wrapper(root_path_controls, root_path_patients, task_names)
     """
 
-    for i in range(len(file_names)):
+    input_directory_controls = os.path.join(root_path_controls, input_directory)
+    input_directory_patients = os.path.join(root_path_patients, input_directory)
+    output_directory_controls = os.path.join(root_path_controls, output_directory)
+    output_directory_patients = os.path.join(root_path_patients, output_directory)
+
+    for i in range(len(task_names)):
         
-        task_name = file_names[i]
+        # Set up the input and run the idoct model on the control sample
+        task_name = task_names[i]
         acc_file = f'{task_name}_accuracy.csv'
         rt_file = f'{task_name}_rt.csv'
         trialdef_file = f'{task_name}_trialdef.csv'
         
+        df,df_difficulty,at_max,rt_max = run_idoct_model_controls(input_directory_controls, acc_file,rt_file,trialdef_file, task_name, output_directory_controls)
+        
+        # Set up the input and apply the idoct model on the patient sample
         difficulty_controls = f'{task_name}_trialDifficulty.csv'
         outcomes_controls = f'{task_name}_outcomes.csv'
-        
-        df,df_difficulty,at_max,rt_max = run_idoct_model_controls(input_directory_controls, acc_file,rt_file,trialdef_file, task_name)
 
-        df_pats = apply_idoct_model_patients(output_directory_controls, input_directory_patients, acc_file,rt_file,trialdef_file, difficulty_controls, outcomes_controls, at_max, rt_max, task_name)
+        df_pats = apply_idoct_model_patients(output_directory_controls, input_directory_patients, acc_file,rt_file,trialdef_file, difficulty_controls, outcomes_controls, at_max, rt_max, task_name, output_directory_patients)
 
         print(f'Model has been successfully applied to {task_name}')
 
 
-def run_idoct_model_controls(path, acc_file,rt_file,trialdef_file, task_name, output_folder='idoct_output'):
+def run_idoct_model_controls(path, acc_file,rt_file,trialdef_file, task_name, output_directory):
     
     
     """
@@ -96,7 +113,7 @@ def run_idoct_model_controls(path, acc_file,rt_file,trialdef_file, task_name, ou
         Filename of the trial definition CSV (e.g. 'IC3_calculation_trialdef.csv').
     task_name : str
         The name or prefix of the task (e.g. 'IC3_calculation').
-    output_folder : str, optional
+    output_directory : str, optional
         The relative output folder where the results (`{task_name}_outcomes.csv`
         and `{task_name}_trialDifficulty.csv`) are saved. Defaults to 'idoct_output'.
 
@@ -214,14 +231,14 @@ def run_idoct_model_controls(path, acc_file,rt_file,trialdef_file, task_name, ou
     df['AS_scaled'] = (df['AS'] - df['AS'].mean())/df['AS'].std()
     df['DT_scaled'] = (df['DT'] - df['DT'].mean())/df['DT'].std()
     
-    df.to_csv(f'../{output_folder}/{task_name}_outcomes.csv')
-    df_difficulty.to_csv(f'../{output_folder}/{task_name}_trialDifficulty.csv')
+    df.to_csv(f'{output_directory}/{task_name}_outcomes.csv')
+    df_difficulty.to_csv(f'{output_directory}/{task_name}_trialDifficulty.csv')
     
     return df,df_difficulty,at_max,rt_max
 
 
 
-def apply_idoct_model_patients(path_controls, path_patients, acc_file,rt_file,trialdef_file, difficulty_controls, outcomes_controls, at_max_controls, rt_max_controls, task_name, output_folder="idoct_output"):
+def apply_idoct_model_patients(path_controls, path_patients, acc_file,rt_file,trialdef_file, difficulty_controls, outcomes_controls, at_max_controls, rt_max_controls, task_name, output_directory):
 
     """
     Applies a previously fitted iDoct model (from controls) to patient data, saving
@@ -257,7 +274,7 @@ def apply_idoct_model_patients(path_controls, path_patients, acc_file,rt_file,tr
         The maximum reaction time (RT) from the control dataset.
     task_name : str
         The name/prefix of the task (e.g. 'IC3_calculation').
-    output_folder : str, optional
+    output_directory : str, optional
         Directory where the resulting patient outcomes CSV is saved. Defaults to 'idoct_output'.
 
     Returns
@@ -367,7 +384,7 @@ def apply_idoct_model_patients(path_controls, path_patients, acc_file,rt_file,tr
     df['AS_scaled'] = (df['AS'] - df_controls['AS'].mean())/df_controls['AS'].std()
     df['DT_scaled'] = (df['DT'] - df_controls['DT'].mean())/df_controls['DT'].std()
     
-    df.to_csv(f'../{output_folder}/{task_name}_outcomes.csv')
+    df.to_csv(f'{output_directory}/{task_name}_outcomes.csv')
 
     return df
 
@@ -683,4 +700,4 @@ def ordinal_encode(str_mat):
     return lookupTable, tmp_mat
 
 if __name__ == "__main__":
-    main()
+    main_wrapper()

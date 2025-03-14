@@ -46,6 +46,10 @@ This repository contains the programming scripts, data, and analysis pipelines a
 
 `bash pip install -r docs/requirements.txt`
 
+3.  **Data Download**
+
+The data can be made available on reasonable request and upon institutional regulatory approval. For more information email [dragos-cristian.gruia19\@imperial.ac.uk](mailto:dragos-cristian.gruia19@imperial.ac.uk){.email}
+
 ## Running the Analyses
 
 1.  **Data Preparation:** Ensure that all required datasets are placed in the data/ directory.
