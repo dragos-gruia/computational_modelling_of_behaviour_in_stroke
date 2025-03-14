@@ -18,6 +18,14 @@ Here we present a computational method that can reliably isolate cognitive abili
 
 The current work shows that neurological patients with motor impairments no longer need to be excluded from remote clinical testing. Moreover, the current methodology can be applied to virtually any cognitive or digital test that records trial-level information, benefitting a wide range of neurological conditions. The current framework has the potential to reduce diagnostic bottlenecks, improve accessibility, and support early detection and intervention for a broad spectrum of neurological disorders.
 
+<p align="center">
+
+<img src="Figures/key tasks graph.png"/>
+
+**Figure 1** - Four representative digital tasks discussed in the paper, out of 18, with opposing levels of motor and cognitive load. Each task is \~3 minutes in duration. Highlighted text refers to the primary cognitive domain being assessed.
+
+</p>
+
 ## Repository Structure
 
 ├── Python_scripts/ - Analysis scripts in Python
