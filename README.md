@@ -2,23 +2,23 @@
 
 ## Paper Summary
 
-This repository contains the programming scripts, data, and analysis pipelines associated with the paper **"Differentiating motor and cognitive deficits in patients with neurological impairment during self-administered digital tasks."** In this study, the authors applied a computational framework to disentangle cognitive deficits from confounding motor impairments in self-administered digital tasks. Key highlights include:
+This repository contains the programming scripts, data, and analysis pipelines associated with the paper **"Differentiating motor and cognitive deficits in patients with neurological impairment during self-administered digital tasks."** In this study, the authors applied a computational framework to disentangle cognitive deficits from confounding motor impairments in self-administered digital tasks.
 
--   **Objective:**\
-    To isolate cognitive performance from motor impairments (such as those caused by an impaired hand or device variability) in neurological patients, via an iterative modelling framework (IDoCT).
+## Research in context
 
--   **Methods:**\
-    The study analyzed data from 171 stroke survivors (assessed longitudinally) alongside a normative cohort of 6000+ healthy older adults. The framework computes a modelled *Cognitive Index* by triangulating trial accuracy, reaction time, and trial difficulty, while removing motor-related confounds.
+#### **Evidence before this study**
 
--   **Results:**\
-    Standard cognitive performance metrics were significantly affected by motor impairments and by the device that patients used. In contrast, the modelled Cognitive Index showed no significant confounding effects and demonstrated stronger correlations with pen-and-paper clinical scales (e.g., MoCA), quality of life post-stroke (IADL), and neuroimaging metrics of cerebrovascular disease.
+A PubMed search for 'neurological impairment', 'cognition', 'computerised testing', and 'remote testing' conducted in March 2025 highlighted growing interest in remote and computerised assessments over the past decade. The heterogeneity of cognitive deficits in neurological conditions and the debilitating effect these have on functional recovery highlights the benefit that computerised cognitive testing would have in terms of supporting more detailed assessments, early detection and longitudinal tracking of the impairments. However, these assessments typically exclude patients with co-occurring motor impairment, who would benefit the most from the remote nature of the assessments and from monitoring of symptoms. There is a need for inclusive methods that allow this large patient group to have their cognition assessed and monitored in a manner that is not confounded by motor impairment.
 
--   **Conclusion:**\
-    The modelled Cognitive Index improves the clinical utility and validity of remote digital assessments in patients with co-occurring motor and cognitive deficits. This approach has the potential to reduce diagnostic delays and enhance early detection and intervention strategies across a range of neurological disorders.
+#### **Added value of this study**
+
+Here we present a computational method that can reliably isolate cognitive ability from motor impairment in neurological patients. To test it, we chose stroke as a representative neurological disorder, as patients frequently experience both motor and cognitive impairments. We validated the framework across a very broad spectrum of cognitive domains, and across time. We found that it removes the confounding effect of motor impairment across all tasks, and that the resulting cognitive outcomes have stronger relationships with 1) established clinical assessments, 2) functional outcomes post-stroke and 3) MRI metrics of brain health.
+
+#### **Implications of all the available evidence**
+
+The current work shows that neurological patients with motor impairments no longer need to be excluded from remote clinical testing. Moreover, the current methodology can be applied to virtually any cognitive or digital test that records trial-level information, benefitting a wide range of neurological conditions. The current framework has the potential to reduce diagnostic bottlenecks, improve accessibility, and support early detection and intervention for a broad spectrum of neurological disorders.
 
 ## Repository Structure
-
-├── Data_availability/ - Information on how to obtain the data used in this paper
 
 ├── Python_scripts/ - Analysis scripts in Python
 
@@ -44,7 +44,7 @@ This repository contains the programming scripts, data, and analysis pipelines a
 
 2.  **Install Dependencies:**
 
-`bash pip install -r docs/requirements.txt`
+Dependencies for the Python and R scripts can be found and installed from the `Docs/` Directory
 
 3.  **Data Download**
 
@@ -52,13 +52,15 @@ The data can be made available on reasonable request and upon institutional regu
 
 ## Running the Analyses
 
-1.  **Data Preparation:** Ensure that all required datasets are placed in the data/ directory.
+1.  **Data Preparation:** Ensure that all required datasets are placed in a directory called data/
 
 2.  **Execute Analysis Scripts** Run the main analysis script to reproduce the results:
 
-    `bash python scripts/run_analysis.py`
+    For the Python scripts use `Python_scripts/main.py` to run the entire analysis pipeline. The only information required to run the function are the path to the data and the desired output directory. See examples and further details inside the function.
 
-3.  **Output** Generated figures are saved in figures/directory
+    For the R scripts use `R_scripts/run_all.R` to run all scripts and save the outputs.
+
+3.  **Output** Generated figures are saved in Figures/directory
 
 ## Citation
 

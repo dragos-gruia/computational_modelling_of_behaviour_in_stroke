@@ -1,22 +1,32 @@
+
+
+"""
+================================================================================
+Author: Dragos-Cristian Gruia
+Last Modified: 14/03/2025
+================================================================================
+"""
+
+
 import matplotlib.pyplot as plt
 import seaborn as sn
 import statsmodels.api as sm
 import numpy as np
 import pandas as pd
-import warnings
 import os
 import itertools
 from statsmodels.stats.multitest import fdrcorrection
-
+from calculate_motor_impairment import *
 
 def plot_group_handImpairment_effect(
-    path_files,
+    root_path, 
+    task_names,
     output_path,
-    dv,
-    demographic_file,
+    column_mapping=None,
+    dv=['AS_scaled', 'Accuracy'],                                          
+    demographic_file='patient_data_cleaned_linked.xlsx', 
     patient_group=None,
     labels_dv=None,
-    column_mapping=None,
     random_effects=['ID', 'timepoint'],
     independent_vars=[
         'age', 'gender', 'english_secondLanguage',
@@ -25,8 +35,8 @@ def plot_group_handImpairment_effect(
         'NIHSS at admission or 2 hours after thrombectomy/thrombolysis',
         'timepoint', 'impaired_hand'
     ],
-    var_of_interest='impaired_hand'
-):
+    var_of_interest='impaired_hand',
+    file_extention='_outcomes.csv'):
 
     """
     Analyzes and plots the effect of hand impairment on multiple dependent variables.
@@ -35,49 +45,54 @@ def plot_group_handImpairment_effect(
     merges each with demographic and motor information, and fits either a mixed-effects
     or OLS regression model. It then plots bar charts of the standardized beta
     coefficients for a specified predictor variable (by default, 'impaired_hand'). 
-    Each subplot corresponds to a single task file, and each bar within the subplot 
+    Each subplot corresponds to a single task, and each bar within the subplot 
     represents one of the dependent variables specified in `dv`.
 
     Parameters
     ----------
-    path_files : list of str
-        A list of CSV file paths. Each file should contain:
-          - A set of outcome measures (columns) identified by the task name or other
-            relevant headers.
-          - A shared key column `user_id` for merging with demographic and motor info data.
+    root_path : str
+        The root directory path where the task outcome files are located. Each
+        task name from `task_names` is appended to this path along with `file_extention`
+        to form the full file path to the CSV file.
+    task_names : list of str
+        A list of task name strings (without file extensions). Each task name is
+        combined with `root_path` and `file_extention` to create the file path for 
+        the corresponding CSV file containing outcome measures. For example, if a
+        task name is "IC3_rs_SRT", the file path will be constructed as:
+        os.path.join(root_path, "IC3_rs_SRT" + file_extention).
     output_path : str
         Directory path where the resulting figure (`handImpairment_effects.png`)
         will be saved.
     dv : list of str
-        A list of dependent variable column names. The function will model each DV
-        against `independent_vars` and display the effect size of `var_of_interest`.
+        A list of dependent variable column names. The function models each DV
+        against `independent_vars` and displays the effect size of `var_of_interest`.
     demographic_file : str
         File name (CSV or Excel) containing demographic data. Must be located in
-        the same folder as `../trial_data/` relative to each task file path. 
-        This file must share the `user_id` column for merging.
+        the '../trial_data/' folder relative to each task file path. This file must
+        contain the 'user_id' column for merging.
     patient_group : {'acute', 'chronic', None}, optional
         - If 'acute', retains only observations with `timepoint == 1`.
         - If 'chronic', retains only observations with `timepoint != 1`.
         - If None, no filtering by `timepoint` is applied.
         Defaults to None.
     labels_dv : list of str, optional
-        Custom labels for each dependent variable in the legend. If provided, must
-        be the same length as `dv`.
+        Custom labels for each dependent variable to be used in the plot legend.
+        If provided, the list must be the same length as `dv`.
     column_mapping : dict, optional
-        A mapping of task names (parsed from the file name) to more descriptive labels.
-        If provided and includes an entry for a given task name, it will be used
-        as the plot title for that task’s subplot. Otherwise, the raw name is used.
+        A mapping of task name strings to more descriptive labels. If provided and
+        contains an entry for a given task name, that label is used as the subplot
+        title. Otherwise, the raw task name is used.
     random_effects : list of str, optional
         Columns specifying the random effects for a mixed model. If:
           - `len(random_effects) == 1`: Only one grouping factor is used (e.g., ID).
           - `len(random_effects) == 2`: The second grouping factor is modeled as a
-            random slope. For instance, `random_effects=['ID', 'timepoint']`.
+            random slope. For example, `random_effects=['ID', 'timepoint']`.
           - If None or empty, an ordinary least-squares (OLS) model is fitted instead
             of a mixed model.  
         Defaults to ['ID', 'timepoint'].
     independent_vars : list of str, optional
-        A list of fixed-effect predictors in the model, which must include `var_of_interest`.
-        Defaults to:
+        A list of fixed-effect predictors in the model, which must include 
+        `var_of_interest`. Defaults to:
         [
             'age', 'gender', 'english_secondLanguage',
             'education_Alevels', 'education_bachelors',
@@ -87,42 +102,52 @@ def plot_group_handImpairment_effect(
         ].
     var_of_interest : str, optional
         The primary predictor whose effect size is being plotted (default 'impaired_hand').
+    file_extention : str, optional
+        Suffix to append to each task name to form the CSV file name. Defaults to
+        '_outcomes.csv'. Ensure that the file extension string correctly matches the
+        naming convention of your task files.
 
     Returns
     -------
     None
-        The function saves a figure named 'handImpairment_effects.png' in the given
+        The function saves a figure named 'handImpairment_effects.png' in the specified
         `output_path` and does not return any value.
 
     Raises
     ------
     FileNotFoundError
-        If a CSV file in `path_files` or the `demographic_file` does not exist.
+        If a CSV file constructed from a task name or the demographic file does not exist.
     ValueError
-        If the `demographic_file` is not a .csv or .xlsx.
+        If the `demographic_file` is not in a supported format (i.e., not .csv, .xls, or .xlsx).
     KeyError
-        If required columns (e.g., `user_id`, or columns in `dv` or `independent_vars`)
+        If required columns (e.g., `user_id`, or columns specified in `dv` or `independent_vars`)
         are missing from the input data.
 
     Notes
     -----
-    - The function internally merges each task DataFrame with demographic info
-      (in `demographic_file`) and motor information (via `get_motor_information`),
+    - The function internally merges each task DataFrame with demographic information 
+      (from `demographic_file`) and motor information (obtained via `get_motor_information`),
       using `user_id` as the common key.
-    - For tasks not named 'IC3_rs_SRT' or 'IC3_NVtrailMaking', the script assigns
-      the main outcome measure to `df['Accuracy']`.
-    - The function log-transforms `NIHSS at admission or 2 hours after thrombectomy/thrombolysis`
+    - For tasks not named 'IC3_rs_SRT' or 'IC3_NVtrailMaking', the function assigns the main
+      outcome measure to `df['Accuracy']`.
+    - The function log-transforms the variable 
+      'NIHSS at admission or 2 hours after thrombectomy/thrombolysis' (after adding 1)
       and standardizes `age`.
-    - The dependent variables in `dv` are also standardized before modeling.
-    - P-values for the effect of `var_of_interest` on each dependent variable
-      are corrected for multiple comparisons using the Benjamini-Hochberg (FDR)
-      procedure. Statistically significant results (< 0.05) are marked with an asterisk.
+    - The dependent variables in `dv` are standardized before modeling.
+    - An intercept column is added to the design matrix.
+    - P-values for the effect of `var_of_interest` on each dependent variable are corrected for
+      multiple comparisons using the Benjamini-Hochberg (FDR) procedure. Statistically significant
+      results (adjusted p-value < 0.05) are marked with an asterisk.
+    - The bar plots display the absolute standardized beta coefficients, with a hatching pattern
+      applied to the second half of the bars in each subplot.
+    - Subplots are arranged in a grid with up to three columns per row.
 
     Examples
     --------
-    >>> path_files = [
-    ...     "/path/to/IC3_rs_SRT_outcomes.csv",
-    ...     "/path/to/IC3_calculation_outcomes.csv"
+    >>> root_path = "/path/to/task_files"
+    >>> task_names = [
+    ...     "IC3_rs_SRT",
+    ...     "IC3_calculation"
     ... ]
     >>> output_path = "/path/to/output"
     >>> dv = ["Accuracy", "ReactionTime"]
@@ -132,7 +157,8 @@ def plot_group_handImpairment_effect(
     ...     "IC3_calculation": "Calculation Task"
     ... }
     >>> plot_group_handImpairment_effect(
-    ...     path_files=path_files,
+    ...     root_path=root_path,
+    ...     task_names=task_names,
     ...     output_path=output_path,
     ...     dv=dv,
     ...     demographic_file=demographic_file,
@@ -140,14 +166,40 @@ def plot_group_handImpairment_effect(
     ...     labels_dv=['Acc (%)', 'RT (ms)'],
     ...     column_mapping=column_mapping
     ... )
-
     """
+    
+    def load_demographics(task_path):
 
-    fig_rows = len(path_files)/3 if len(path_files)%3 == 0 else fig_rows = int(len(path_files)/3) + 1
-    fig_cols = 3 if len(path_files) >=3 else fig_cols = len(path_files)
+        """
+        Loads demographic data from a CSV or Excel file in `../trial_data/`.
+
+        Parameters
+        ----------
+        task_path : str
+            The file path of a task CSV. The demographic file is assumed to be located
+            in `../trial_data/` relative to this path.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing demographic information merged on 'user_id'.
+        """
+
+        base_dir = os.path.dirname(task_path)
+        demo_path = os.path.join(base_dir, '..', 'trial_data', demographic_file)
+        ext = demographic_file.split('.')[-1].lower()
+        if ext == 'csv':
+            return pd.read_csv(demo_path)
+        elif ext in ['xls', 'xlsx']:
+            return pd.read_excel(demo_path)
+        else:
+            raise ValueError("Unsupported demographic file format.")
+
+    fig_rows = len(task_names)/3 if (len(task_names)%3 == 0) else int(len(task_names)/3) + 1
+    fig_cols = 3 if (len(task_names) >=3) else len(task_names)
 
     # Set up the figure and subplots
-    fig, axes = plt.subplots(fig_rows, fig_cols, figsize=(25, 8 * len(path_files)/3))
+    fig, axes = plt.subplots(fig_rows, fig_cols, figsize=(25, 8 * len(task_names)/3))
     fig.subplots_adjust(hspace=0.2)
 
     # Generate all subplot coordinates (Cartesian product)
@@ -159,30 +211,28 @@ def plot_group_handImpairment_effect(
     x_labels = ['']  # Single category on the x-axis, used as a placeholder
 
     # Loop through each task path
-    for i, task_path in enumerate(path_files):
+    for i, task in enumerate(task_names):
+        
+        task_path = os.path.join(root_path, task + file_extention)
+
         # Subplot coordinate selection
         row_idx, col_idx = subplot_coordinates[i]
-        ax_sub = axes[row_idx, col_idx]
-
-        # Extract the task name from the file path
-        task_name = task_path.split('/')[-1].split('_outcomes')[0]
+        
+        if fig_rows ==1:
+            ax_sub = axes[col_idx]
+        else:
+            ax_sub = axes[row_idx, col_idx]
 
         # Read the CSV for the task
         df_task = pd.read_csv(task_path).reset_index(drop=True)
 
-        # Merge with demographic data
-        os.chdir('/'.join(task_path.split('/')[:-1]))
-
-        if demographic_file.endswith('.csv'):
-            df_dem = pd.read_csv(f'../trial_data/{demographic_file}')
-        elif demographic_file.endswith('.xlsx'):
-            df_dem = pd.read_excel(f'../trial_data/{demographic_file}')
-        else:
-            print('Incorrect demographic file type. Must be CSV or XLSX.')
-            return
-
-        # Merge with motor info (assuming get_motor_information is defined elsewhere)
-        df_motor = get_motor_information('../trial_data/')
+        # Merge with demographics and motor info (assuming get_motor_information is defined elsewhere)
+        
+        df_dem = load_demographics(task_path)
+        
+        base_dir = os.path.dirname(task_path)
+        motor_path = os.path.join(base_dir, '..', 'trial_data')
+        df_motor = get_motor_information(motor_path)
 
         df = (df_task
               .merge(df_dem, how='left', on='user_id')
@@ -195,8 +245,8 @@ def plot_group_handImpairment_effect(
         df['age'] = (df['age'] - df['age'].mean()) / df['age'].std()
 
         # If the task is not SRT or NVtrailMaking, assign raw outcome to 'Accuracy'
-        if task_name not in ['IC3_rs_SRT', 'IC3_NVtrailMaking']:
-            df['Accuracy'] = df[task_name]
+        if task not in ['IC3_rs_SRT', 'IC3_NVtrailMaking']:
+            df['Accuracy'] = df[task]
 
         # Drop rows missing DV or independent vars
         df.dropna(subset=dv, inplace=True)
@@ -275,9 +325,9 @@ def plot_group_handImpairment_effect(
 
         # Title or custom label for the subplot
         if column_mapping:
-            title_label = column_mapping.get(task_name, task_name)
+            title_label = column_mapping.get(task, task)
         else:
-            title_label = task_name
+            title_label = task
 
         ax_sub.text(
             0.5, 1.15,

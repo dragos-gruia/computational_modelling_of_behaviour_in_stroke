@@ -1,94 +1,99 @@
 
+"""
+================================================================================
+Author: Dragos-Cristian Gruia
+Last Modified: 14/03/2025
+================================================================================
+"""
+
 import matplotlib.pyplot as plt
 import seaborn as sn
 import os
 import pandas as pd
 
-def plot_group_difficulty_scale(path_files, output_path, column_mapping=None, sort_by_difficulty=True):
+def create_group_difficulty_scale(root_path, task_names, output_path, column_mapping=None, sort_by_difficulty=True, file_extention='_trialDifficulty.csv'):
      
     """
     Plots and saves scatter plots of task-specific trial difficulties.
 
-    This function reads one or more CSV files containing trial difficulty data
-    (e.g., a 'DS' column representing scaled difficulty and an 'Original_difficulty'
-    column describing each trial). For each file (task), the function optionally
-    sorts the dataset by trial difficulty 'DS', applies task-specific difficulty label formatting
-    via the `trial_formatting` function, and creates a scatter plot with
-    `Original_difficulty` on the x-axis and 'DS' on the y-axis.
-
-    The resulting figure contains one subplot per file and is saved in the specified
-    `output_path` as `task_trialDifficulty.svg`.
+    This function reads one or more CSV files containing trial difficulty data – each file is expected to include 
+    a 'DS' column representing a scaled measure of difficulty from the IDoCT model and an 'Original_difficulty' column describing the 
+    difficulty label for each trial. The function loads the data for each task, and optionally sorts the data by the 'DS' column if `sort_by_difficulty` is True. 
+    The function applies task-specific formatting to the 'Original_difficulty' labels via the `format_trial_difficulty` 
+    helper function, and creates a scatter plot with 'Original_difficulty' on the x-axis and 'DS' on the y-axis.
+    The resulting figure contains one subplot per task and is saved in the specified `output_path` as `task_trialDifficulty.svg`.
 
     Parameters
     ----------
-    path_files : list of str
-        A list of CSV file paths. Each file must contain:
-            - 'DS' (float): A numeric scale of difficulty for each trial.
-            - 'Original_difficulty' (str): A descriptor for each trial's difficulty.
+    root_path : str
+        The directory path where the task outcome CSV files are stored. Each task file is constructed by joining 
+        this path with a task name (from `task_names`) appended with `file_extention`.
+    task_names : list of str
+        A list of task name strings (without file extensions). Each task name is appended with `file_extention` and 
+        joined with `root_path` to form the full path to the CSV file containing trial difficulty data.
     output_path : str
-        The directory path where the generated figure (`task_trialDifficulty.svg`)
-        will be saved.
+        The directory path where the generated figure (`task_trialDifficulty.svg`) will be saved.
     column_mapping : dict, optional
-        A mapping from task names (parsed from the file name) to descriptive titles.
-        For example, `{"IC3_Comprehension": "Comprehension Task"}`. If provided and
-        contains a key matching the task name, the subplot title will use the
-        descriptive title instead of the raw task name. Defaults to None.
+        A mapping from task names (extracted from the file name) to descriptive titles. For example, 
+        `{"IC3_Comprehension": "Comprehension Task"}`. If provided and a key matching the task name is found, 
+        the subplot title will use the descriptive title instead of the raw task name. Defaults to None.
     sort_by_difficulty : bool, optional
-        If True, the rows in each file are sorted by the 'DS' column before plotting.
-        If False, the original order of trials in the CSV is retained. Defaults to True.
+        If True, the rows in each CSV file are sorted by the 'DS' column before plotting; if False, the original 
+        order of trials is retained. Defaults to True.
+    file_extention : str, optional
+        The file extension to append to each task name to form the complete file name. Defaults to '_trialDifficulty.csv'.
 
     Returns
     -------
     None
-        The function does not return any value; it saves a multi-subplot figure
-        to `output_path`.
+        The function does not return any value; it saves a multi-subplot figure to `output_path`.
 
     Raises
     ------
     FileNotFoundError
-        If any of the files in `path_files` cannot be found when attempting to read.
+        If any of the task files (constructed from `root_path` and a task name) cannot be found.
     ValueError
-        If the CSV file does not contain the expected columns ('DS', 'Original_difficulty').
+        If a CSV file does not contain the expected columns ('DS', 'Original_difficulty').
 
     Notes
     -----
-    - The function calls `trial_formatting(df, task_name)` internally, which modifies
-      the contents and ordering of the 'Original_difficulty' column, depending on
-      the nature of the task.
-    - Each subplot’s x-axis labels are rotated for readability, and the y-axis
-      represents the scaled difficulty values in 'DS'.
-    - The figure size is proportional to the number of files (i.e., subplots).
+    - Each subplot’s x-axis labels are rotated 90 degrees for readability, and the y-axis displays the scaled 
+      difficulty values from 'DS'.
+    - The figure size is proportional to the number of tasks (i.e., one subplot per task), and subplots are 
+      vertically spaced.
 
     Examples
     --------
-    >>> # Suppose we have two difficulty files, 'IC3_Comprehension_trialDifficulty.csv'
-    >>> # and 'IC3_rs_PAL_trialDifficulty.csv', in a local directory:
-    >>> path_files = [
-    ...     "/path/to/IC3_Comprehension_trialDifficulty.csv",
-    ...     "/path/to/IC3_rs_PAL_trialDifficulty.csv"
-    ... ]
+    >>> # Suppose we have two trial difficulty files: 'IC3_Comprehension_trialDifficulty.csv'
+    >>> # and 'IC3_rs_PAL_trialDifficulty.csv', located in a directory:
+    >>> root_path = "/path/to/task_files"
+    >>> task_names = ["IC3_Comprehension", "IC3_rs_PAL"]
     >>> output_path = "/path/to/output"
     >>> column_mapping = {
     ...     "IC3_Comprehension": "Comprehension Task",
     ...     "IC3_rs_PAL": "Paired Association Learning Task"
     ... }
-    >>> plot_group_difficulty_scale(
-    ...     path_files=path_files,
+    >>> create_group_difficulty_scale(
+    ...     root_path=root_path,
+    ...     task_names=task_names,
     ...     output_path=output_path,
     ...     column_mapping=column_mapping,
     ...     sort_by_difficulty=True
     ... )
     """
     
-    fig, axes = plt.subplots(len(path_files), 1, figsize=(30, 15*len(path_files)))  # Adjust the figure size if necessary
+    
+    fig, axes = plt.subplots(len(task_names), 1, figsize=(30, 15*len(task_names)))  # Adjust the figure size if necessary
     fig.subplots_adjust(hspace=1.5)
         
     panel_number = 0
     
-    for task_path in path_files:
+    for task in task_names:
         
         # Load task data
         
+        task_path = os.path.join(root_path, task + file_extention)
+
         df = pd.read_csv(task_path)
         df = df.replace([float('inf'), -float('inf')], float('nan'))
         
@@ -123,6 +128,7 @@ def plot_group_difficulty_scale(path_files, output_path, column_mapping=None, so
         panel_number = panel_number + 1
         
     # Save figures
+    print('Task difficulty plots were created.')
     fig.savefig(f'{output_path}/task_trialDifficulty.svg', format='svg', transparent=False)
 
 

@@ -2,7 +2,13 @@
 
 """
 Collection of functions used to estimate motor delay from cognitive tasks using
-a fixed-point equation model.
+a fixed-point equation model (i.e. the IDoCT model).
+
+================================================================================
+Original author: Valentina Giunchiglia
+Adapted by: Dragos-Cristian Gruia
+Last Modified: 14/03/2025
+================================================================================
 
 The main workflow involves two phases:
 1. Running the model on a control cohort (`run_idoct_model_controls`), deriving
@@ -16,7 +22,7 @@ Giunchiglia, V., Gruia, D.C., Lerede, A., Trender, W., Hellyer, P. and Hampshire
 An iterative approach for estimating domain-specific cognitive abilities from large scale online cognitive data. 
 NPJ Digital Medicine, 7(1), p.328.  
 
-Here we adapt the use of the model so that it can applied in patient populations.
+Here I adapt the use of the model so that it can applied in patient populations.
 """
 
 import os
@@ -27,45 +33,46 @@ from time import time
 def main_wrapper(root_path_controls, root_path_patients, task_names, input_directory= 'idoct_input',  output_directory = 'idoct_output'):
     
     """
-    Runs the iDoct model on control data, then applies it to patient data for each task.
+    Runs the iDoct model on control data and then applies it to patient data for for any given task or list of tasks.
 
-    For each task in `file_names`, this function does the following:
-    1. Constructs file paths for accuracy, RT (reaction time), and trial-definition CSVs.
-    2. Runs the IDoCT model on the control cohort to compute maximum answer time (`at_max`)
-       and maximum reaction time (`rt_max`).
-    3. Applies the derived model to patient data, scaling the patient's outcome measures
-       accordingly.
+    For the first task in `task_names`, this function does the following:
+      1. Constructs file paths for accuracy, reaction time (RT), and trial-definition CSVs.
+      2. Runs the iDoCT model on the control cohort to compute the maximum answer time (`at_max`)
+         and maximum reaction time (`rt_max`).
+      3. Applies the derived model to patient data, scaling the patient's outcome measures accordingly.
 
     Parameters
     ----------
     root_path_controls : str
         The directory where the control CSV files (accuracy, RT, trial definition) are located.
     root_path_patients : str
-        The directory where the patients CSV files (accuracy, RT, trial definition) are located.
+        The directory where the patient CSV files (accuracy, RT, trial definition) are located.
     task_names : list of str
-        The list of task file prefixes (e.g., 'IC3_calculation', 'IC3_Comprehension'). For each task,
-        the function will look for files named like `{task_name}_accuracy.csv`, `{task_name}_rt.csv`,
-        and `{task_name}_trialdef.csv`.
-    input_directory : str
-        The directory containing patient CSV files (accuracy, RT, trial definition).
-    output_directory : str
-        The directory for model results (e.g., scaled outcomes and difficulty files).
-
+        A list of task file prefixes (e.g., 'IC3_calculation', 'IC3_Comprehension'). For each task, the function 
+        will look for files named `{task_name}_accuracy.csv`, `{task_name}_rt.csv`, and `{task_name}_trialdef.csv`.
+    input_directory : str, optional
+        The subdirectory (within both control and patient directories) that contains the input CSV files.
+        Defaults to 'idoct_input'.
+    output_directory : str, optional
+        The subdirectory (within both control and patient directories) where the model results (e.g., scaled outcomes 
+        and difficulty files) will be saved. Defaults to 'idoct_output'.
 
     Returns
     -------
-    None
-        This function does not return any data structure; it prints a success message
-        for each processed task and saves the outcomes to files in specified directories.
+    tuple of str
+        A tuple containing:
+          - The control output directory (output_directory_controls)
+          - The patient output directory (output_directory_patients)
 
     Examples
     --------
     >>> root_path_controls = "/path/to/control_data"
-    >>> root_path_patients = "/path/to/control_output"
+    >>> root_path_patients = "/path/to/patient_data"
     >>> task_names = ["IC3_calculation", "IC3_Comprehension"]
     >>> main_wrapper(root_path_controls, root_path_patients, task_names)
     """
 
+    # Define paths
     input_directory_controls = os.path.join(root_path_controls, input_directory)
     input_directory_patients = os.path.join(root_path_patients, input_directory)
     output_directory_controls = os.path.join(root_path_controls, output_directory)
@@ -88,6 +95,8 @@ def main_wrapper(root_path_controls, root_path_patients, task_names, input_direc
         df_pats = apply_idoct_model_patients(output_directory_controls, input_directory_patients, acc_file,rt_file,trialdef_file, difficulty_controls, outcomes_controls, at_max, rt_max, task_name, output_directory_patients)
 
         print(f'Model has been successfully applied to {task_name}')
+        
+    return output_directory_controls, output_directory_patients
 
 
 def run_idoct_model_controls(path, acc_file,rt_file,trialdef_file, task_name, output_directory):
