@@ -74,7 +74,7 @@ The data can be made available on reasonable request and upon institutional regu
 
 If you use this repository in your work, please cite the paper as follows:
 
-`Gruia, D.-C., Giunchiglia, V., Braban, A., Parkinson, N., Banerjee, S., Kwan, J., Hellyer, P. J., Hampshire, A., & Geranmayeh, F. (2025). Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders. MedRxiv. DOI 10.1101/2025.03.14.25323903`
+`Gruia, D.-C., Giunchiglia, V., Braban, A., Parkinson, N., Banerjee, S., Kwan, J., Hellyer, P. J., Hampshire, A., & Geranmayeh, F. (2025). Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders. MedRxiv. https://doi.org/10.1101/2025.03.14.25323903`
 
 ## License
 
