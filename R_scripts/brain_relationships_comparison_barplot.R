@@ -63,10 +63,8 @@ for (input_file in input_data_types) {
     #      with missing cognitive data (IC3_rs_SRT).
     # ---------------------------------------------------------------------------#
     patient_df <- read_excel(input_file) %>%
-      filter(!is.na(IC3_rs_SRT),
-           !user_id %in% c("ic3study00044-session4-versionB",
-                           "ic3study00078-session2-versionB",
-                           "ic3study00119-session2-versionB"))
+      filter(!is.na(IC3_rs_SRT))
+    
     patient_df <- if (tp == 3) {
       filter(patient_df, timepoint >= tp)
     } else {
