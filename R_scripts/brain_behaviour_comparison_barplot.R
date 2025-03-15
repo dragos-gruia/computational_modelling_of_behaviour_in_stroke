@@ -1,21 +1,23 @@
 # ============================================================================ #
-# Script: PCA and Correlation Analysis for MOCA and IADL Data (IDoct Version)
+# Script: Correlation Analysis for Patient Imaging and Cognitive Data
 #
 # Description:
 #   This script performs a principal component analysis (PCA) on cognitive data
-#   extracted from healthy and patient imaging records (IDoct version) and
-#   evaluates the correlation between a global cognitive index derived from PCA
-#   and two clinical measures (MOCA and IADL scores). The analysis is conducted
-#   separately for each timepoint (Acute, Sub-acute, Chronic) and the resulting
-#   plots are combined and saved as a PNG file.
+#   derived from patient imaging records and investigates the correlation
+#   between a global cognitive index (derived from the first principal component) and
+#   two imaging metrics (stroke lesion volume and WMH lesion volume). The analysis is
+#   conducted separately for the Sub-acute and Chronic stages, and the resulting
+#   correlation plots are combined and saved as a PNG file.
 #
 # Inputs:
-#   - clean_healthy_idoct.xlsx : Excel file containing healthy cognitive data.
-#   - patient_data_idoct_withImaging_linked.xlsx : Excel file containing patient
-#       imaging, MOCA, and IADL data.
+#   - patient_data_withImaging_linked.xlsx : Excel file containing patient imaging 
+#       and cognitive data.
+#   - patient_data_idoct_withImaging_linked.xlsx : Alternate Excel file containing 
+#       patient imaging, modelled metrics of cognition, and clinical data.
 #
 # Outputs:
-#   - pca_results_moca_iadl_idoct.png : Combined correlation plots.
+#   - imaging_comparison.png : Combined barplot displaying the R-squared values
+#       of the correlations between imaging metrics and the global cognitive index.
 #
 # Author: [Dragos Gruia]
 # Date: [3-March-2025]
@@ -56,13 +58,15 @@ for (input_file in input_data_types) {
   for (tp in timepoints) {
     
     # ---------------------------------------------------------------------------#
-    # 2. Load and filter patient data for the current timepoint -----------
+    # 1. Load and filter patient data for the current timepoint -----------
     #    - Read the patient data, filter based on timepoint, and remove entries
     #      with missing cognitive data (IC3_rs_SRT).
     # ---------------------------------------------------------------------------#
     patient_df <- read_excel(input_file) %>%
-      filter(!is.na(IC3_rs_SRT))
-    
+      filter(!is.na(IC3_rs_SRT),
+           !user_id %in% c("ic3study00044-session4-versionB",
+                           "ic3study00078-session2-versionB",
+                           "ic3study00119-session2-versionB"))
     patient_df <- if (tp == 3) {
       filter(patient_df, timepoint >= tp)
     } else {
@@ -74,12 +78,12 @@ for (input_file in input_data_types) {
     users_patients <- patient_df$user_id
     
     # ---------------------------------------------------------------------------#
-    # 3. Subset cognitive columns for PCA ----------------------------------------
+    # 2. Subset cognitive columns for PCA ----------------------------------------
     # ---------------------------------------------------------------------------#
     patient_cog <- patient_df %>% select(all_of(column_mapping))
     
     # ---------------------------------------------------------------------------#
-    # 4. Perform PCA using the "bpca" method ------------------------------------
+    # 3. Perform PCA using the "bpca" method ------------------------------------
     #    - PCA is performed on the patient cognitive data with 17 principal components.
     # ---------------------------------------------------------------------------#
     pca_method <- "bpca"
@@ -88,7 +92,7 @@ for (input_file in input_data_types) {
     factor_scores <- scores(resPCA)
     
     # ---------------------------------------------------------------------------#
-    # 5. Merge PCA scores with imaging -------------------------------------------
+    # 4. Merge PCA scores with imaging -------------------------------------------
     # ---------------------------------------------------------------------------#
     
     # Combine imaging variables with the PCA factor scores
@@ -104,6 +108,7 @@ for (input_file in input_data_types) {
       mutate(g = -scale(PC1, center = TRUE, scale = TRUE)[, 1]) %>%
       select(-user_id)
     
+    # Calculate correlations between imaging and cognitive metrics
     for (imaging_var in c('volume_lesion', 'volume_wmh')) {
       cor_test <- cor.test(df_patients[[imaging_var]], df_patients$g, use = "pairwise.complete.obs")
       r_squared <- round(cor_test$estimate^2, 2)
@@ -123,6 +128,13 @@ for (input_file in input_data_types) {
 
 }   
 
+
+# -----------------------------------------------------------------------------#
+# 5. Prepare data for plotting -------------------------------------------------
+#    - Create a data frame containing the R-squared estimates, corresponding labels,
+#      and a factor indicating the cognitive performance metric type.
+#    - Adjust the p-values using the FDR method and annotate significance.
+# -----------------------------------------------------------------------------#
 data_type = c(rep('Standard accuracy', length(labels_list)/2), rep('Modelled Cognitive Index', length(labels_list)/2))
 adjusted_p <- round(p.adjust(p_estimates, method = "fdr"),2)
 adjusted_p <- ifelse(adjusted_p < 0.05, "*", " ")
@@ -132,6 +144,12 @@ df_plot$data_type = as.factor(df_plot$data_type)
 df_plot$r_estimates = as.numeric(df_plot$r_estimates)
 df_plot$labels_list = factor(df_plot$labels_list, levels = rev(sort(unique(df_plot$labels_list))))
 
+# -----------------------------------------------------------------------------#
+# 6. Create the barplotc -------------------------------------------------------
+#    - Generate a barplot displaying the R-squared values for each imaging-cognition
+#      correlation.
+#    - Annotate the plot with significance markers.
+# -----------------------------------------------------------------------------#
 plot_comparison <- ggplot(df_plot, aes(x = labels_list, y = r_estimates, fill = data_type)) +
   geom_bar(stat = "identity", position = position_dodge2(width = 1, padding = 0.02)) +
   geom_text(aes(label = adjusted_p), 
@@ -141,12 +159,12 @@ plot_comparison <- ggplot(df_plot, aes(x = labels_list, y = r_estimates, fill = 
   theme_classic() +
   theme(text = element_text(size = 16), axis.text.x = element_text(angle = 40, hjust = 1), legend.position = c(0.85, 0.85)) +
   scale_fill_manual(name = 'Cognitive Performance', values = c("#7851A9", "#ffd400")) +
-  #ggtitle(timepoint_label) +
   ylab("R-squared") +
   scale_y_continuous(limits = c(0, 0.25)) +  # Sets y-axis from 0 to 100
   xlab("")
   
 plot_comparison 
 
+# Save the figure
 ggsave("imaging_comparison.png", plot = plot_comparison,
        device = "png", width = 12, height = 8, units = "in")
