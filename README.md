@@ -2,7 +2,7 @@
 
 ## Paper Summary
 
-This repository contains the programming scripts, data, and analysis pipelines associated with the paper **"Differentiating motor and cognitive deficits in patients with neurological impairment during self-administered digital tasks."** In this study, the authors applied a computational framework to disentangle cognitive deficits from confounding motor impairments in self-administered digital tasks.
+This repository contains the programming scripts, data, and analysis pipelines associated with the paper **"Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders."** In this study, the authors applied a computational framework to disentangle cognitive deficits from confounding motor impairments in self-administered digital tasks.
 
 ## Research in context
 
@@ -74,7 +74,7 @@ The data can be made available on reasonable request and upon institutional regu
 
 If you use this repository in your work, please cite the paper as follows:
 
-`Gruia, D.-C., Giunchiglia, V., Braban, A., Parkinson, N., Banerjee, S., Kwan, J., Hellyer, P. J., Hampshire, A., & Geranmayeh, F. (2025). Differentiating motor and cognitive deficits in patients with neurological impairment during self-administered digital tasks. Pre-print.`
+`Gruia, D.-C., Giunchiglia, V., Braban, A., Parkinson, N., Banerjee, S., Kwan, J., Hellyer, P. J., Hampshire, A., & Geranmayeh, F. (2025). Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders. MedRxiv. DOI 10.1101/2025.03.14.25323903`
 
 ## License
 
