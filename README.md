@@ -4,6 +4,10 @@
 
 This repository contains the programming scripts, data, and analysis pipelines associated with the paper **"Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders."** In this study, the authors applied a computational framework to disentangle cognitive deficits from confounding motor impairments in self-administered digital tasks.
 
+## Statistical techniques applied in the paper
+
+Mathematical modelling, Mixed effects regressions modelling, Bayesian PCA analysis, Hypothesis Testing and Non-Parametric Methods
+
 ## Research in context
 
 #### **Evidence before this study**
