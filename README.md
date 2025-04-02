@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This repository contains the data cleaning and analysis pipelines associated with the paper **"Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders."** In this project, I developed a computational framework to improve the reliability and clinical utility of remote digital health assessments in patients struggling with physical/motor impairments. The results suggest that the impact of physical impairment on performance has been fully mitigated and that the framework yields highly reliable and clinically valid outcomes.
+This repository contains the data cleaning and analysis pipelines associated with the paper **"Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders."** In this project, I developed a computational framework to improve the reliability and clinical utility of remote digital health assessments in patients struggling with physical/motor impairments. The results suggest that the negative impact of physical impairment on performance has been fully mitigated and that the framework yields highly reliable and clinically valid outcomes.
 
 ## Statistical techniques applied in the paper
 
