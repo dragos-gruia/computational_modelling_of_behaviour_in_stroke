@@ -2,7 +2,7 @@
 
 ## Paper Summary
 
-This repository contains the programming scripts, data, and analysis pipelines associated with the paper **"Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders."** In this study, the authors applied a computational framework to disentangle cognitive deficits from confounding motor impairments in self-administered digital tasks.
+This repository contains the programming scripts, data cleaning, and analysis pipelines associated with the paper **"Mitigating the impact of motor impairment on self-administered digital tests in patients with neurological disorders."** In this study, I applied a computational framework to improves the reliability and clinical utility of remote digital health assessments in patients struggling with physical/motor impairments.
 
 ## Statistical techniques applied in the paper
 
@@ -12,15 +12,15 @@ Mathematical modelling, Mixed effects regressions modelling, Bayesian PCA analys
 
 #### **Evidence before this study**
 
-A PubMed search for 'neurological impairment', 'cognition', 'computerised testing', and 'remote testing' conducted in March 2025 highlighted growing interest in remote and computerised assessments over the past decade. The heterogeneity of cognitive deficits in neurological conditions and the debilitating effect these have on functional recovery highlights the benefit that computerised cognitive testing would have in terms of supporting more detailed assessments, early detection and longitudinal tracking of the impairments. However, these assessments typically exclude patients with co-occurring motor impairment, who would benefit the most from the remote nature of the assessments and from monitoring of symptoms. There is a need for inclusive methods that allow this large patient group to have their cognition assessed and monitored in a manner that is not confounded by motor impairment.
+There is growing interest in developing remote, computerised cognitive assessments for both clinical and research use. The heterogeneity of cognitive deficits in neurological conditions and their detrimental impact on functional outcomes, underscore the value of computerised cognitive testing in facilitating early detection and longitudinal tracking of the impairments. However, these self-administered assessments are confounded by commonly occurring motor deficits. Consequently, these vulnerable patients, who may stand to benefit the most from the remote nature of the assessments, are often excluded from participating in them. A PubMed search for ‘neurological impairment’, ‘cognition’, ‘remote testing’, and ‘computerised testing’ on 10 March 2025, revealed that this was not addressed in the literature to date. There is a need for developing inclusive methods that enable accurate cognitive assessment and monitoring for this large patient group, free from the confounding effects of motor impairment.
 
 #### **Added value of this study**
 
-Here we present a computational method that can reliably isolate cognitive ability from motor impairment in neurological patients. To test it, we chose stroke as a representative neurological disorder, as patients frequently experience both motor and cognitive impairments. We validated the framework across a very broad spectrum of cognitive domains, and across time. We found that it removes the confounding effect of motor impairment across all tasks, and that the resulting cognitive outcomes have stronger relationships with 1) established clinical assessments, 2) functional outcomes post-stroke and 3) MRI metrics of brain health.
+Here, I apply a computational method that can reliably isolate true cognitive ability from hand-motor impairment in neurological patients. Using patients with stroke as a representative neurological disorder affecting both motor and cognitive impairments, I validated the framework across a broad spectrum of cognitive domains and recovery stages. I show that the model removes the confounding effect of hand motor impairment across all digital tasks, and that the resulting cognitive outcomes have stronger relationships with 1) established clinical assessments, 2) quality of life and independence post-stroke and 3) MRI measures of brain injury.
 
 #### **Implications of all the available evidence**
 
-The current work shows that neurological patients with motor impairments no longer need to be excluded from remote clinical testing. Moreover, the current methodology can be applied to virtually any cognitive or digital test that records trial-level information, benefitting a wide range of neurological conditions. The current framework has the potential to reduce diagnostic bottlenecks, improve accessibility, and support early detection and intervention for a broad spectrum of neurological disorders.
+Neurological patients experiencing motor impairments can now benefit from self-administered remote cognitive assessments, which, when enhanced by our computational framework, yield reliable and clinically valid measurements. Furthermore, this approach has a wide applicability to any cognitive task or digital test that records trial-by-trial performance information, potentially benefitting a wide range of digital health initiatives. By reducing diagnostic bottlenecks, enhancing accessibility to vulnerable patient groups, and enabling early detection and monitoring of deficits, the current framework holds significant potential for improving care across a broad spectrum of neurological conditions.
 
 <p align="center">
 
