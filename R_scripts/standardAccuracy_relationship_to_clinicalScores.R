@@ -118,7 +118,7 @@ for (tp in seq_along(timepoint_stage)) {
   cor_moca <- cor(df_patients$MOCA, df_patients$g, use = "pairwise.complete.obs")
   test_moca <- cor.test(df_patients$MOCA, df_patients$g, use = "pairwise.complete.obs")
   r_value <- round(cor_moca, 2)
-  p_value <- ifelse(round(test_moca$p.value, 3) == 0, "P<.001", glue("P={round(test_moca$p.value, 3)}"))
+  p_value <- ifelse(round(test_moca$p.value, 4) == 0, "P<.0001", glue("P={round(test_moca$p.value, 2)}"))
   
   g_moca <- ggplot(df_patients, aes(x = MOCA, y = g)) +
     geom_point(shape = 16, size = 3, color = "#7851A9") +
@@ -132,7 +132,7 @@ for (tp in seq_along(timepoint_stage)) {
     annotate("text",
              x = min(df_patients$MOCA, na.rm = TRUE),
              y = max(df_patients$g, na.rm = TRUE) + 0.3,
-             hjust = 0, vjust = 1, size = 6,
+             hjust = 0, vjust = 1, size = 5,
              label = glue("R-squared={round(r_value^2, 2)}, {p_value}"),
              parse = FALSE)
   
@@ -144,7 +144,7 @@ for (tp in seq_along(timepoint_stage)) {
   cor_iadl <- cor(df_patients$IADL, df_patients$g, use = "pairwise.complete.obs")
   test_iadl <- cor.test(df_patients$IADL, df_patients$g, use = "pairwise.complete.obs")
   r_value <- round(cor_iadl, 2)
-  p_value <- ifelse(round(test_iadl$p.value, 3) == 0, "P<.001", glue("P={round(test_iadl$p.value, 3)}"))
+  p_value <- ifelse(round(test_iadl$p.value, 4) == 0, "P<.0001", glue("P={round(test_iadl$p.value, 2)}"))
   
   g_iadl <- ggplot(df_patients, aes(x = IADL, y = g)) +
     geom_point(shape = 16, size = 3, color = "#7851A9") +
@@ -157,7 +157,7 @@ for (tp in seq_along(timepoint_stage)) {
     annotate("text",
              x = min(df_patients$IADL, na.rm = TRUE),
              y = max(df_patients$g, na.rm = TRUE) + 0.3,
-             hjust = 0, vjust = 1, size = 6,
+             hjust = 0, vjust = 1, size = 5,
              label = glue("R-squared={round(r_value^2, 2)}, {p_value}"),
              parse = FALSE)
   
@@ -171,6 +171,7 @@ for (tp in seq_along(timepoint_stage)) {
 # 6. Combine Plots Across All Timepoints and Save the Final Figure ------------
 # -----------------------------------------------------------------------------#
 combined_plot_all <- combined_plots[[1]] | combined_plots[[2]] | combined_plots[[3]]
+print(combined_plot_all)
+
 ggsave("pca_results_moca_iadl_raw.png", plot = combined_plot_all,
        device = "png", width = 12, height = 8, units = "in")
-print(combined_plot_all)

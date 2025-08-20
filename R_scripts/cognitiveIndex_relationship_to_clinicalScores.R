@@ -103,8 +103,8 @@ for (tp in seq_along(timepoint_stage)) {
   
   # Plot: G vs MOCA 
   r_moca <- round(cor(df_patients$MOCA, df_patients$g, use = "pairwise.complete.obs"), 2)
-  p_moca <- round(cor.test(df_patients$MOCA, df_patients$g, use = "pairwise.complete.obs")$p.value, 3)
-  p_moca <- ifelse(p_moca == 0, "P<.001", glue("P={p_moca}"))
+  p_moca <- round(cor.test(df_patients$MOCA, df_patients$g, use = "pairwise.complete.obs")$p.value, 4)
+  p_moca <- ifelse(p_moca == 0, "P<.0001", glue("P={p_moca}"))
   
   g_moca <- ggplot(df_patients, aes(x = MOCA, y = g)) +
     geom_point(shape = 16, size = 3, color = "#7851A9") +
@@ -116,14 +116,14 @@ for (tp in seq_along(timepoint_stage)) {
     annotate("text",
              x = min(df_patients$MOCA, na.rm = TRUE),
              y = max(df_patients$g, na.rm = TRUE) + 0.3,
-             hjust = 0, vjust = 1, size = 6,
+             hjust = 0, vjust = 1, size = 5,
              label = glue("R-squared={round(r_moca^2, 2)}, {p_moca}"),
              parse = FALSE)
   
   # Plot: G vs IADL 
   r_iadl <- round(cor(df_patients$IADL, df_patients$g, use = "pairwise.complete.obs"), 2)
-  p_iadl <- round(cor.test(df_patients$IADL, df_patients$g, use = "pairwise.complete.obs")$p.value, 3)
-  p_iadl <- ifelse(p_iadl == 0, "P<.001", glue("P={p_iadl}"))
+  p_iadl <- round(cor.test(df_patients$IADL, df_patients$g, use = "pairwise.complete.obs")$p.value, 2)
+  p_iadl <- ifelse(p_iadl == 0, "P<.0001", glue("P={p_iadl}"))
   
   g_iadl <- ggplot(df_patients, aes(x = IADL, y = g)) +
     geom_point(shape = 16, size = 3, color = "#7851A9") +
@@ -136,7 +136,7 @@ for (tp in seq_along(timepoint_stage)) {
     annotate("text",
              x = min(df_patients$IADL, na.rm = TRUE),
              y = max(df_patients$g, na.rm = TRUE) + 0.3,
-             hjust = 0, vjust = 1, size = 6,
+             hjust = 0, vjust = 1, size = 5,
              label = glue("R-squared={round(r_iadl^2, 2)}, {p_iadl}"),
              parse = FALSE)
   
