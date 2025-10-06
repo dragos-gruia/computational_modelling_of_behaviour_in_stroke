@@ -78,7 +78,7 @@ The data can be made available on reasonable request and upon institutional regu
 
 If you use this repository in your work, please cite the paper as follows:
 
-`Gruia, Dragos-Cristian, Valentina Giunchiglia, Andra Braban, Niamh Parkinson, Soma Banerjee, Joseph Kwan, Peter J. Hellyer, Adam Hampshire, and Fatemeh Geranmayeh. "Mitigating the impact of motor impairment on self-administered digital tests: a longitudinal cohort study in stroke." EClinicalMedicine 88 (2025).`
+`Gruia, Dragos-Cristian, Valentina Giunchiglia, Andra Braban, Niamh Parkinson, Soma Banerjee, Joseph Kwan, Peter J. Hellyer, Adam Hampshire, and Fatemeh Geranmayeh. "Mitigating the impact of motor impairment on self-administered digital tests: a longitudinal cohort study in stroke." EClinicalMedicine 88 (2025). DOI: 10.1016/j.eclinm.2025.103469`
 
 ## License
 
